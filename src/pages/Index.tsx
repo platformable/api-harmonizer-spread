@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import FileUpload from '@/components/FileUpload';
 import ComparisonGrid from '@/components/ComparisonGrid';
-import { OpenAPIFile, ParsedOpenAPI } from '@/types/openapi';
+import { OpenAPIFile, ParsedOpenAPI, OpenAPIEndpoint, OpenAPIServer, OpenAPISecurityScheme } from '@/types/openapi';
 
 const Index = () => {
   const [files, setFiles] = useState<OpenAPIFile[]>([]);
