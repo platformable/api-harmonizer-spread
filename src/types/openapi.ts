@@ -16,6 +16,20 @@ export interface OpenAPIInfo {
   };
 }
 
+export interface OpenAPIServer {
+  url?: string;
+  description?: string;
+}
+
+export interface OpenAPISecurityScheme {
+  type?: string;
+  description?: string;
+  name?: string;
+  in?: string;
+  scheme?: string;
+  bearerFormat?: string;
+}
+
 export interface OpenAPIEndpoint {
   path: string;
   method: string;
@@ -37,6 +51,8 @@ export interface ParsedOpenAPI {
   name: string;
   content: any;
   info: OpenAPIInfo;
+  servers: OpenAPIServer[];
+  securitySchemes: Record<string, OpenAPISecurityScheme>;
   endpoints: OpenAPIEndpoint[];
   schemas: OpenAPISchema[];
 }

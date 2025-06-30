@@ -12,6 +12,35 @@ const Index = () => {
   const [files, setFiles] = useState<OpenAPIFile[]>([]);
   const [parsedFiles, setParsedFiles] = useState<ParsedOpenAPI[]>([]);
 
+  const extractEndpoints = (content: any): OpenAPIEndpoint[] => {
+    const endpoints: OpenAPIEndpoint[] = [];
+    if (content.paths) {
+      Object.entries(content.paths).forEach(([path, pathObj]: [string, any]) => {
+        Object.entries(pathObj).forEach(([method, methodObj]: [string, any]) => {
+          if (typeof methodObj === 'object' && methodObj !== null) {
+            endpoints.push({
+              path,
+              method: method.toUpperCase(),
+              summary: methodObj.summary,
+              operationId: methodObj.operationId,
+              parameters: methodObj.parameters || [],
+              responses: methodObj.responses || {}
+            });
+          }
+        });
+      });
+    }
+    return endpoints;
+  };
+
+  const extractServers = (content: any): OpenAPIServer[] => {
+    return content.servers || [];
+  };
+
+  const extractSecuritySchemes = (content: any): Record<string, OpenAPISecurityScheme> => {
+    return content.components?.securitySchemes || {};
+  };
+
   const handleFileUpload = useCallback((newFiles: OpenAPIFile[]) => {
     setFiles(prev => [...prev, ...newFiles]);
     
@@ -32,13 +61,19 @@ const Index = () => {
             return;
           }
           
+          const endpoints = extractEndpoints(parsed);
+          const servers = extractServers(parsed);
+          const securitySchemes = extractSecuritySchemes(parsed);
+          
           const parsedFile: ParsedOpenAPI = {
             id: Math.random().toString(36).substr(2, 9),
             name: file.name,
             content: parsed,
-            endpoints: [], // No longer extracting endpoints
-            schemas: [], // No longer extracting schemas
-            info: parsed.info || {}
+            info: parsed.info || {},
+            servers,
+            securitySchemes,
+            endpoints,
+            schemas: [] // Keep empty for now
           };
           
           setParsedFiles(prev => [...prev, parsedFile]);
