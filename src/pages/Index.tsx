@@ -36,8 +36,8 @@ const Index = () => {
             id: Math.random().toString(36).substr(2, 9),
             name: file.name,
             content: parsed,
-            endpoints: extractEndpoints(parsed),
-            schemas: extractSchemas(parsed),
+            endpoints: [], // No longer extracting endpoints
+            schemas: [], // No longer extracting schemas
             info: parsed.info || {}
           };
           
@@ -61,9 +61,7 @@ const Index = () => {
     const comparisonData = {
       files: parsedFiles.map(f => ({
         name: f.name,
-        info: f.info,
-        endpointCount: f.endpoints.length,
-        schemaCount: f.schemas.length
+        info: f.info
       })),
       timestamp: new Date().toISOString()
     };
@@ -93,7 +91,7 @@ const Index = () => {
             OpenAPI Comparison Tool
           </h1>
           <p className="text-gray-600 text-lg">
-            Upload multiple OpenAPI files and compare them side by side
+            Upload multiple OpenAPI files and compare their information side by side
           </p>
         </div>
 
@@ -128,10 +126,9 @@ const Index = () => {
                         <p className="text-sm text-gray-500 mt-1">
                           {file.info.title || 'No title'}
                         </p>
-                        <div className="flex gap-4 mt-2 text-xs text-gray-600">
-                          <span>{file.endpoints.length} endpoints</span>
-                          <span>{file.schemas.length} schemas</span>
-                        </div>
+                        <p className="text-xs text-gray-600 mt-1">
+                          Version: {file.info.version || 'Not specified'}
+                        </p>
                       </div>
                     </div>
                   ))}
@@ -176,43 +173,6 @@ const Index = () => {
       </div>
     </div>
   );
-};
-
-// Helper functions to extract data from OpenAPI spec
-const extractEndpoints = (spec: any) => {
-  const endpoints = [];
-  if (spec.paths) {
-    for (const [path, methods] of Object.entries(spec.paths)) {
-      for (const [method, details] of Object.entries(methods as any)) {
-        if (typeof details === 'object' && details !== null) {
-          endpoints.push({
-            path,
-            method: method.toUpperCase(),
-            summary: (details as any).summary || '',
-            operationId: (details as any).operationId || '',
-            parameters: (details as any).parameters || [],
-            responses: (details as any).responses || {}
-          });
-        }
-      }
-    }
-  }
-  return endpoints;
-};
-
-const extractSchemas = (spec: any) => {
-  const schemas = [];
-  if (spec.components?.schemas) {
-    for (const [name, schema] of Object.entries(spec.components.schemas)) {
-      schemas.push({
-        name,
-        type: (schema as any).type || 'object',
-        properties: (schema as any).properties || {},
-        required: (schema as any).required || []
-      });
-    }
-  }
-  return schemas;
 };
 
 export default Index;
