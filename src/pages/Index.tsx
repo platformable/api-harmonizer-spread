@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 import { Upload, Download, FileText, Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -6,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import FileUpload from '@/components/FileUpload';
 import ComparisonGrid from '@/components/ComparisonGrid';
-import { OpenAPIFile, ParsedOpenAPI, OpenAPIEndpoint, OpenAPIServer, OpenAPISecurityScheme } from '@/types/openapi';
+import { OpenAPIFile, ParsedOpenAPI, OpenAPIEndpoint, OpenAPIServer, OpenAPISecurityScheme, OpenAPISchema } from '@/types/openapi';
 
 const Index = () => {
   const [files, setFiles] = useState<OpenAPIFile[]>([]);
@@ -41,6 +40,23 @@ const Index = () => {
     return content.components?.securitySchemes || {};
   };
 
+  const extractSchemas = (content: any): OpenAPISchema[] => {
+    const schemas: OpenAPISchema[] = [];
+    if (content.components?.schemas) {
+      Object.entries(content.components.schemas).forEach(([name, schemaObj]: [string, any]) => {
+        if (typeof schemaObj === 'object' && schemaObj !== null) {
+          schemas.push({
+            name,
+            type: schemaObj.type || 'object',
+            properties: schemaObj.properties || {},
+            required: schemaObj.required || []
+          });
+        }
+      });
+    }
+    return schemas;
+  };
+
   const handleFileUpload = useCallback((newFiles: OpenAPIFile[]) => {
     setFiles(prev => [...prev, ...newFiles]);
     
@@ -64,6 +80,7 @@ const Index = () => {
           const endpoints = extractEndpoints(parsed);
           const servers = extractServers(parsed);
           const securitySchemes = extractSecuritySchemes(parsed);
+          const schemas = extractSchemas(parsed);
           
           const parsedFile: ParsedOpenAPI = {
             id: Math.random().toString(36).substr(2, 9),
@@ -73,7 +90,7 @@ const Index = () => {
             servers,
             securitySchemes,
             endpoints,
-            schemas: [] // Keep empty for now
+            schemas
           };
           
           setParsedFiles(prev => [...prev, parsedFile]);

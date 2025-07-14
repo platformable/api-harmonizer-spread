@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { ParsedOpenAPI } from '@/types/openapi';
@@ -12,7 +11,8 @@ const ComparisonGrid: React.FC<ComparisonGridProps> = ({ files }) => {
     info: true,
     servers: false,
     security: false,
-    endpoints: false
+    endpoints: false,
+    schemas: false
   });
 
   const toggleSection = (section: string) => {
@@ -42,6 +42,22 @@ const ComparisonGrid: React.FC<ComparisonGridProps> = ({ files }) => {
       total: totalEndpoints,
       withResponses: endpointsWithResponses,
       withResponseDescriptions: endpointsWithResponseDescriptions
+    };
+  };
+
+  const getSchemaSummary = (file: ParsedOpenAPI) => {
+    const totalSchemas = file.schemas.length;
+    const schemasWithProperties = file.schemas.filter(schema => 
+      schema.properties && Object.keys(schema.properties).length > 0
+    ).length;
+    const schemasWithRequired = file.schemas.filter(schema => 
+      schema.required && schema.required.length > 0
+    ).length;
+
+    return {
+      total: totalSchemas,
+      withProperties: schemasWithProperties,
+      withRequired: schemasWithRequired
     };
   };
 
@@ -298,6 +314,71 @@ const ComparisonGrid: React.FC<ComparisonGridProps> = ({ files }) => {
                     </div>
                   );
                 })}
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Schemas Section */}
+        <div className="border-b">
+          <div 
+            className="grid gap-4 p-4 bg-white hover:bg-gray-50 cursor-pointer border-b"
+            style={{ gridTemplateColumns: `300px repeat(${files.length}, 1fr)` }}
+            onClick={() => toggleSection('schemas')}
+          >
+            <div className="flex items-center gap-2 font-medium">
+              {expandedSections.schemas ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+              Schemas & Data Models
+            </div>
+            {files.map((file) => (
+              <div key={file.id} className="text-sm text-gray-600">
+                {file.schemas.length > 0 ? `${file.schemas.length} schema(s)` : 'Null'}
+              </div>
+            ))}
+          </div>
+
+          {expandedSections.schemas && (
+            <>
+              <div className="grid gap-4 p-4 bg-gray-50" style={{ gridTemplateColumns: `300px repeat(${files.length}, 1fr)` }}>
+                <div className="text-sm font-medium pl-6">Total Schemas</div>
+                {files.map((file) => {
+                  const summary = getSchemaSummary(file);
+                  return (
+                    <div key={file.id} className="text-sm">
+                      {summary.total || 'Null'}
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="grid gap-4 p-4 bg-white" style={{ gridTemplateColumns: `300px repeat(${files.length}, 1fr)` }}>
+                <div className="text-sm font-medium pl-6">Schemas with Properties</div>
+                {files.map((file) => {
+                  const summary = getSchemaSummary(file);
+                  return (
+                    <div key={file.id} className="text-sm">
+                      {summary.withProperties || 'Null'}
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="grid gap-4 p-4 bg-gray-50" style={{ gridTemplateColumns: `300px repeat(${files.length}, 1fr)` }}>
+                <div className="text-sm font-medium pl-6">Schemas with Required Fields</div>
+                {files.map((file) => {
+                  const summary = getSchemaSummary(file);
+                  return (
+                    <div key={file.id} className="text-sm">
+                      {summary.withRequired || 'Null'}
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="grid gap-4 p-4 bg-white" style={{ gridTemplateColumns: `300px repeat(${files.length}, 1fr)` }}>
+                <div className="text-sm font-medium pl-6">Schema Names</div>
+                {files.map((file) => (
+                  <div key={file.id} className="text-sm">
+                    {file.schemas.length > 0 ? file.schemas.map(s => s.name).join(', ') : 'Null'}
+                  </div>
+                ))}
               </div>
             </>
           )}
