@@ -134,16 +134,24 @@ const Index = () => {
   }, [parsedFiles]);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+    <div className="min-h-screen bg-background p-4">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2 flex items-center gap-3">
-            <FileText className="text-blue-600" />
+        {/* Hero Section */}
+        <div className="text-center py-16 mb-12">
+          <div className="flex items-center justify-center mb-8">
+            <img 
+              src="/lovable-uploads/a39897f3-ccef-4aa3-a6bd-380cd5f5ec22.png" 
+              alt="Platformable Logo" 
+              className="h-16 w-auto"
+            />
+          </div>
+          <h1 className="text-5xl font-bold text-foreground mb-4 flex items-center justify-center gap-3">
+            <FileText className="text-primary" />
             OpenAPI Comparison Tool
           </h1>
-          <p className="text-gray-600 text-lg">
-            Upload multiple OpenAPI files and compare their information side by side
+          <p className="text-muted-foreground text-xl max-w-3xl mx-auto leading-relaxed">
+            Upload multiple OpenAPI files and compare their information side by side. 
+            Analyze endpoints, schemas, security schemes, and more with our comprehensive comparison tool.
           </p>
         </div>
 
