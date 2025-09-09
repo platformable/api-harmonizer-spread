@@ -5,6 +5,7 @@ export interface OpenAPIInfo {
   title?: string;
   version?: string;
   description?: string;
+  termsOfService?: string;
   contact?: {
     name?: string;
     email?: string;

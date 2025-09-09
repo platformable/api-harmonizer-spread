@@ -133,6 +133,35 @@ const Index = () => {
     toast.success('Comparison exported successfully');
   }, [parsedFiles]);
 
+  const getFieldCompletionStats = useCallback(() => {
+    if (parsedFiles.length < 2) return { highCompletion: [], lowCompletion: [] };
+
+    const fieldStats = {
+      'API Title': parsedFiles.filter(f => f.info.title).length,
+      'API Description': parsedFiles.filter(f => f.info.description).length,
+      'API Version': parsedFiles.filter(f => f.info.version).length,
+      'Contact Info': parsedFiles.filter(f => f.info.contact).length,
+      'License': parsedFiles.filter(f => f.info.license).length,
+      'Terms of Service': parsedFiles.filter(f => f.info.termsOfService).length,
+      'Servers': parsedFiles.filter(f => f.servers.length > 0).length,
+      'Security Schemes': parsedFiles.filter(f => Object.keys(f.securitySchemes).length > 0).length,
+      'Schema Documentation': parsedFiles.filter(f => f.schemas.length > 0).length,
+      'Endpoint Summaries': parsedFiles.filter(f => f.endpoints.some(e => e.summary)).length,
+    };
+
+    const total = parsedFiles.length;
+    const stats = Object.entries(fieldStats).map(([field, count]) => ({
+      field,
+      count,
+      percentage: Math.round((count / total) * 100)
+    }));
+
+    const highCompletion = stats.filter(s => s.percentage >= 70).sort((a, b) => b.percentage - a.percentage);
+    const lowCompletion = stats.filter(s => s.percentage < 70).sort((a, b) => a.percentage - b.percentage);
+
+    return { highCompletion, lowCompletion };
+  }, [parsedFiles]);
+
   return (
     <div className="min-h-screen bg-background p-4">
       <div className="max-w-7xl mx-auto">
@@ -204,6 +233,64 @@ const Index = () => {
             )}
           </CardContent>
         </Card>
+
+        {/* API Governance Insights */}
+        {parsedFiles.length > 1 && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>API Governance Insights</CardTitle>
+              <p className="text-muted-foreground">
+                Analyze field completion rates across your APIs to identify documentation patterns and build effective style guides.
+              </p>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* High Completion Fields */}
+                <div>
+                  <h3 className="font-semibold text-foreground mb-3">Well-Documented Fields (Low Hanging Fruit)</h3>
+                  <div className="space-y-2">
+                    {getFieldCompletionStats().highCompletion.map((field, index) => (
+                      <div key={index} className="flex justify-between items-center p-2 bg-green-50 dark:bg-green-900/20 rounded">
+                        <span className="text-sm font-medium">{field.field}</span>
+                        <span className="text-sm text-green-600 dark:text-green-400">{field.percentage}%</span>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Include these in your style guide - teams are already using them consistently.
+                  </p>
+                </div>
+
+                {/* Low Completion Fields */}
+                <div>
+                  <h3 className="font-semibold text-foreground mb-3">Under-Documented Fields (Improvement Areas)</h3>
+                  <div className="space-y-2">
+                    {getFieldCompletionStats().lowCompletion.map((field, index) => (
+                      <div key={index} className="flex justify-between items-center p-2 bg-orange-50 dark:bg-orange-900/20 rounded">
+                        <span className="text-sm font-medium">{field.field}</span>
+                        <span className="text-sm text-orange-600 dark:text-orange-400">{field.percentage}%</span>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Focus on these areas for gradual documentation improvements.
+                  </p>
+                </div>
+              </div>
+
+              {/* Governance Recommendations */}
+              <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">Style Guide Recommendations</h3>
+                <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
+                  <li>• Start with mandatory fields that have {getFieldCompletionStats().highCompletion[0]?.percentage}%+ completion</li>
+                  <li>• Create guidelines for {getFieldCompletionStats().lowCompletion.length} under-documented areas</li>
+                  <li>• Focus on endpoint descriptions and schema documentation first</li>
+                  <li>• Consider automated linting rules for high-completion fields</li>
+                </ul>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Comparison Grid */}
         {parsedFiles.length > 1 && (
